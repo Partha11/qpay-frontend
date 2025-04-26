@@ -5,7 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { formatCurrency } from '@/utils/formatters'
 import { useLoadingStore } from '@/stores/loading'
-import AppHeader from '@/components/header/AppHeader.vue'
 import BrandInfo from '@/components/brand/BrandInfo.vue'
 import PaymentMethod from '@/components/payment/PaymentMethod.vue'
 import TransactionDetail from '@/components/tabs/TransactionDetail.vue'
@@ -32,7 +31,7 @@ const fetchPaymentData = async () => {
     try {
         loadingStore.show();
         const response = await axios.get(
-            `http://192.168.50.174:3000/api/v1/payments/${route.params.id}`,
+            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
             {
                 headers: {
                     'Accept': 'application/json',

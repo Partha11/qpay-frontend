@@ -40,7 +40,7 @@ const processApiData = (data) => {
 const fetchPaymentData = async () => {
     try {
         const response = await fetch(
-            `http://192.168.50.174:3000/api/v1/payments/${route.params.id}`,
+            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
             {
                 method: 'GET',
                 mode: 'cors',
@@ -69,7 +69,7 @@ const verifyPayment = async (body) => {
         isSubmitting.value = true
         loadingStore.show()
         const response = await fetch(
-            `http://192.168.50.174:3000/api/v1/payments/${route.params.id}/execute`,
+            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}/execute`,
             {
                 method: 'POST',
                 headers: {
