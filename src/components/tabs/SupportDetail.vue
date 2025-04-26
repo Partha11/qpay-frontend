@@ -1,5 +1,5 @@
 <script setup>
-import { Phone } from 'lucide-vue-next'
+import { Phone, Mail, MapPin } from 'lucide-vue-next'
 
 defineProps({
     brand: {
@@ -24,19 +24,18 @@ defineProps({
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
                     <span class="text-teal-700 bg-teal-100 rounded-full p-2">
-                        <Phone size="16"/>
+                        <Phone size="16" />
                     </span>
                     <div class="flex flex-col">
                         <span class="text-md">Call Us</span>
                         <span class="text-xs text-gray-500">{{
                             brand?.phone_number ?? 'N/A'
-                            }}</span>
+                        }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="text-teal-700 bg-teal-100 rounded-full p-2">
-                        <!-- <svg-icon type="mdi" :path="mdiEmailOutline" size="16"></svg-icon> -->
-                        <Phone size="16"/>
+                        <Mail size="16" />
                     </span>
                     <div class="flex flex-col">
                         <span class="text-md">Email Us</span>
@@ -45,12 +44,11 @@ defineProps({
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="text-teal-700 bg-teal-100 rounded-full p-2">
-                        <!-- <svg-icon type="mdi" :path="mdiChatOutline" size="16"></svg-icon> -->
-                        <Phone size="16"/>
+                        <MapPin size="16" />
                     </span>
                     <div class="flex flex-col">
-                        <span class="text-md">Live Chat</span>
-                        <span class="text-xs text-gray-500">Available 24/7</span>
+                        <span class="text-md">Address</span>
+                        <span class="text-xs text-gray-500">{{ brand?.address ?? 'N/A' }}</span>
                     </div>
                 </div>
             </div>
