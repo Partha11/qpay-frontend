@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Avatar, Button } from 'primevue'
-import { getIcon } from '@/utils/icon'
+import { getIcon } from '@/utils/icon.js'
 
 defineProps({
     brand: {
@@ -18,8 +18,8 @@ const defaultLogoUrl = ref(
 )
 const tabs = ref([
     { key: 'payment', label: 'Payment', icon: 'CreditCard' },
-    { key: 'details', label: 'Details', icon: 'mdiInformationOutline' },
-    { key: 'support', label: 'Support', icon: 'mdiAccountMultipleOutline' },
+    { key: 'details', label: 'Details', icon: 'Info' },
+    { key: 'support', label: 'Support', icon: 'Headset' },
 ])
 
 const selectTab = (tabKey) => {

@@ -1,11 +1,20 @@
-const getIcon = async (icon) => {
-    try {
-        const module = await import(`lucide-vue-next`);
-        return module[icon];
-    } catch (error) {
-        console.error(`Failed to load icon: ${icon}`, error);
-        return null;
-    }
+import { Activity, CreditCard, Info, Headset, CircleCheck, CircleAlert } from "lucide-vue-next";
+
+const iconComponents = {
+    Activity,
+    CreditCard,
+    Info,
+    Headset,
+    CircleCheck,
+    CircleAlert
 }
+
+const getIcon = (iconName) => {
+    if (iconComponents[iconName]) {
+        return iconComponents[iconName];
+    }
+    console.error(`Icon not found: ${iconName}`);
+    return null;
+};
 
 export { getIcon }

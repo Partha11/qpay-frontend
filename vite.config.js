@@ -7,15 +7,24 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-   base: '/qpay',
-  plugins: [
-    vue(),
-    vueDevTools(),
-    tailwindcss(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+    base: '/qpay/',
+    plugins: [
+        vue(),
+        vueDevTools(),
+        tailwindcss(),
+    ],
+    resolve: {
+        alias: {
+            '@': fileURLToPath(new URL('./src', import.meta.url))
+        },
     },
-  },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'lucide-vue': ['lucide-vue-next']
+                }
+            }
+        }
+    }
 })

@@ -3,23 +3,17 @@ import VerifyView from '@/views/VerifyView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory('/qpay/'),
     routes: [
         {
             path: '/checkout/:id',
             name: 'checkout',
-            component: CheckoutView,
-            meta: {
-                isPaymentView: true
-            }
+            component: CheckoutView
         },
         {
             path: '/verify/:id',
             name: 'verify',
-            component: VerifyView,
-            meta: {
-                isPaymentView: true
-            }
+            component: VerifyView
         },
     ],
 })

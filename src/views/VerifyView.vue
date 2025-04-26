@@ -1,5 +1,6 @@
 <!-- eslint-disable no-unused-vars -->
 <script setup>
+import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -39,20 +40,16 @@ const processApiData = (data) => {
 
 const fetchPaymentData = async () => {
     try {
-        const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
-            {
-                method: 'GET',
-                mode: 'cors',
-            },
-        )
-
-        const data = await response.json()
-
-        if (!response.ok) {
-            throw new Error(data.message)
-        }
-        processApiData(data)
+        const url = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`
+        const response = await axios.get(
+            url, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        console.log(response.data)
+        processApiData(response.data)
     } catch (error) {
         toast.add({
             severity: 'danger',
@@ -66,23 +63,17 @@ const fetchPaymentData = async () => {
 const verifyPayment = async (body) => {
     if (!body) return
     try {
+        const url = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}/execute`
         isSubmitting.value = true
         loadingStore.show()
-        const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}/execute`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
+        const response = await axios.post(url, body, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             },
-        )
-        const data = await response.json()
+        })
 
-        if (!response.ok) {
-            throw new Error(data.message)
-        }
+        const data = response.data
 
         if (paymentData.value.webhook_url) {
             fetch(paymentData.value.webhook_url, {
@@ -128,10 +119,9 @@ onMounted(() => {
 
 <template>
     <div class="about">
-        <BrandInfoWithoutTab :merchant="paymentData.merchant" :amount="paymentData.amount"
+        <BrandInfoWithoutTab :brand="paymentData.brand" :amount="paymentData.amount"
             :currency="paymentData.currency" :method="method" />
-        <PaymentForm :merchant="paymentData.merchant" :amount="paymentData?.amount" :currency="paymentData?.currency"
-            :method="method" :isSubmitting="isSubmitting" @submit="verifyPayment" />
-        <PaymentInstruction :method="method" :amount="paymentData?.amount" :number="paymentData?.merchant?.number" />
+        <PaymentForm :method="method" :isSubmitting="isSubmitting" @submit="verifyPayment" />
+        <PaymentInstruction :method="method" :amount="paymentData?.amount" :number="paymentData?.brand?.number" />
     </div>
 </template>

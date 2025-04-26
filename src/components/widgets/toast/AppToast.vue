@@ -2,18 +2,18 @@
 import { Button, Toast } from 'primevue'
 import { getIcon } from '@/utils/icon'
 
-const icon = async (severity) => {
+const icon = (severity) => {
     switch (severity) {
         case 'success':
-            return getIcon('AlarmClock')
+            return getIcon('CircleCheck')
         case 'info':
-            return getIcon('AlarmClock')
+            return getIcon('Info')
         case 'warn':
-            return getIcon('AlarmClock')
+            return getIcon('CircleAlert')
         case 'danger':
-            return getIcon('AlarmClock')
+            return getIcon('CircleAlert')
         default:
-            return getIcon('AlarmClock')
+            return getIcon('Info')
     }
 }
 
@@ -54,10 +54,10 @@ const bg = (severity) => {
             <section class="flex flex-col pt-1 pb-3 px-3 w-full rounded-xl" :class="bg(message.severity)">
                 <div class="flex items-center justify-between">
                     <div class="flex flex-row items-center space-x-1.5">
-                        <component :is="icon(message.severity)" class="w-3 h-3" />
-                        <span class="font-medium text-md" :class="color(message.severity)">{{
-                            message.summary
-                            }}</span>
+                        <component :is="icon(message.severity)" :class="color(message.severity)" class="w-4 h-4" />
+                        <span class="font-medium text-md" :class="color(message.severity)">
+                            {{ message.summary }}
+                        </span>
                     </div>
                     <Button icon="pi pi-times" :severity="message.severity" variant="text" size="small" rounded
                         aria-label="Cancel" @click="closeCallback" />
