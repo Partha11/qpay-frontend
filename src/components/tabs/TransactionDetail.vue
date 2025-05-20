@@ -52,7 +52,7 @@ const detailItems = computed(() => [
                         {{ `${item.label}:` }}
                     </span>
                     <span :class="[item.highlight ? 'text-teal-600 font-bold' : 'text-gray-800']">
-                        {{ item.value }}
+                        {{ item.value.length > 20 ? item.value.slice(0, 20) + '…' : item.value }}
                     </span>
                 </div>
             </div>

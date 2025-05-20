@@ -119,8 +119,8 @@ onMounted(() => {
 
 <template>
     <div class="about">
-        <BrandInfoWithoutTab :brand="paymentData.brand" :amount="paymentData.amount"
-            :currency="paymentData.currency" :method="method" />
+        <BrandInfoWithoutTab :brand="paymentData.brand" :amount="paymentData.amount" :currency="paymentData.currency"
+            :method="method" />
         <PaymentForm :method="method" :isSubmitting="isSubmitting" @submit="verifyPayment" />
         <PaymentInstruction :method="method" :amount="paymentData?.amount" :number="paymentData?.brand?.number" />
     </div>
