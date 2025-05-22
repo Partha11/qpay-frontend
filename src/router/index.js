@@ -3,7 +3,7 @@ import VerifyView from '@/views/VerifyView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 
 const router = createRouter({
-    history: createWebHistory('/qpay/'),
+    history: createWebHistory('/'),
     routes: [
         {
             path: '/checkout/:id',

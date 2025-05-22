@@ -1,11 +1,10 @@
 <!-- eslint-disable no-unused-vars -->
 <script setup>
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useLoadingStore } from '@/stores/loading'
-import AppHeader from '@/components/header/AppHeader.vue'
 import BrandInfoWithoutTab from '@/components/brand/BrandInfoWithoutTab.vue'
 import PaymentForm from '@/components/payment/PaymentForm.vue'
 import PaymentInstruction from '@/components/payment/instruction/PaymentInstruction.vue'
@@ -21,6 +20,57 @@ const isSubmitting = ref(false)
 const paymentAttempts = ref(0)
 
 const loadingStore = useLoadingStore()
+
+let pollingInterval = null;
+
+const startPollingPaymentStatus = () => {
+    if (pollingInterval) return;
+
+    pollingInterval = setInterval(async () => {
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            const payment = response.data;
+            switch (payment.status) {
+                case 'COMPLETED':
+                    stopPolling(); // stop polling
+                    window.location = payment.success_url;
+                    break;
+                case 'FAILED':
+                    stopPolling();
+                    window.location = payment.failure_url;
+                    break;
+            }
+        } catch (err) {
+            toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: err,
+                life: 3000,
+            })
+        } finally {
+            setTimeout(() => {
+                loadingStore.hide()
+                isSubmitting.value = false
+            }, 200)
+        }
+    }, 3000);
+};
+
+const stopPolling = () => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+};
 
 const getUrlParams = () => {
     const params = new URLSearchParams(window.location.search)
@@ -75,23 +125,23 @@ const verifyPayment = async (body) => {
 
         const data = response.data
 
-        if (paymentData.value.webhook_url) {
-            fetch(paymentData.value.webhook_url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    payment_id: route.params.id,
-                    amount: body.amount,
-                }),
-            }).catch((e) => console.error('Webhook failed', e))
-        }
-
-        if (paymentData.value.success_url) {
-            window.location = paymentData.value.success_url
+        switch (data.status) {
+            case "COMPLETED":
+                window.location = data.success_url
+                break;
+            case "FAILED":
+                window.location = data.failure_url
+                break;
+            default:
+                startPollingPaymentStatus();
+                break;
         }
     } catch (error) {
         paymentAttempts.value++;
-        console.log(paymentData.value.failure_url)
+        setTimeout(() => {
+            loadingStore.hide()
+            isSubmitting.value = false
+        }, 200)
         if (paymentAttempts.value >= MAX_ATTEMPTS && paymentData.value.failure_url) {
             window.location = paymentData.value.failure_url
         } else {
@@ -102,11 +152,6 @@ const verifyPayment = async (body) => {
                 life: 3000,
             })
         }
-    } finally {
-        setTimeout(() => {
-            loadingStore.hide()
-            isSubmitting.value = false
-        }, 200)
     }
 }
 
@@ -115,6 +160,10 @@ onMounted(() => {
     method.value = urlMethod
     fetchPaymentData()
 })
+
+onUnmounted(() => {
+    stopPolling();
+});
 </script>
 
 <template>
