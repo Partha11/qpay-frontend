@@ -14,7 +14,7 @@ const emit = defineEmits(['tabChange'])
 
 const activeTab = ref('payment')
 const defaultLogoUrl = ref(
-    'https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small_2x/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg',
+    'https://img.freepik.com/premium-vector/logo-online-store-business-company-brand_737924-1394.jpg?semt=ais_hybrid&w=740',
 )
 const tabs = ref([
     { key: 'payment', label: 'Payment', icon: 'CreditCard' },

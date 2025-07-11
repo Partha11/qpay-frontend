@@ -20,7 +20,7 @@ const mobileBankingOptions = ref([
     },
     {
         name: 'Rocket',
-        image: 'https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small_2x/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Rocket_mobile_banking_logo.svg/250px-Rocket_mobile_banking_logo.svg.png',
     },
     {
         name: 'Upay',
