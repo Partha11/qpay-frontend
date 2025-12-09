@@ -1,8 +1,14 @@
 # QPay Gateway
 
+[![Node Version][nodejs-image]][nodejs-url]
+[![Vue Version][vue-image]][vue-url]
+[![Vite Version][vite-image]][vite-url]
+[![PrimeVue Version][primevue-image]][primevue-url]
+[![Tailwind CSS Version][tailwind-image]][tailwind-url]
+
 A modern, responsive Vue.js payment gateway application designed for seamless payment processing in Bangladesh. Built with Vue 3, Vite, and PrimeVue, this application provides a smooth checkout experience with support for mobile banking and card payments.
 
-## 🚀 Features
+## Features
 
 - **Mobile Banking Integration**: Support for popular Bangladeshi mobile banking services (bKash, Nagad, Rocket, Upay)
 - **Card Payments**: Visa, Mastercard, American Express, and UnionPay support
@@ -13,25 +19,13 @@ A modern, responsive Vue.js payment gateway application designed for seamless pa
 - **Error Handling**: Robust error handling with retry mechanisms
 - **Brand Customization**: Dynamic branding support for different merchants
 
-## 🛠️ Tech Stack
-
-- **Frontend Framework**: Vue 3 (Composition API)
-- **Build Tool**: Vite
-- **UI Library**: PrimeVue with Aura theme
-- **Styling**: Tailwind CSS
-- **State Management**: Pinia
-- **HTTP Client**: Axios
-- **Icons**: Lucide Vue Next
-- **Routing**: Vue Router
-- **Language**: JavaScript (ES6+)
-
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js (v16 or higher)
 - pnpm package manager
 - Backend API server running
 
-## 🚀 Installation
+## Installation
 
 1. **Clone the repository**
 
@@ -59,7 +53,7 @@ A modern, responsive Vue.js payment gateway application designed for seamless pa
    pnpm dev
    ```
 
-## 📖 Usage
+## Usage
 
 ### Payment Flow
 
@@ -114,7 +108,7 @@ Submits payment verification data and initiates processing.
 - `FAILED`: Redirects to failure URL
 - `PENDING`: Starts polling for status updates
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 src/
@@ -134,7 +128,7 @@ src/
 └── assets/              # Static assets
 ```
 
-## 🔧 Development
+## Development
 
 ### Available Scripts
 
@@ -154,7 +148,7 @@ The project uses ESLint and Prettier for code formatting and quality assurance. 
 | `VITE_API_BASE_URL` | Base URL for the payment API | Yes      |
 | `VITE_API_VERSION`  | API version (e.g., v1)       | Yes      |
 
-## 🎨 Customization
+## Customization
 
 ### Branding
 
@@ -173,7 +167,7 @@ Payment options are configurable through the component props. Add new payment me
 
 Built with Tailwind CSS for easy customization. PrimeVue components use the Aura theme with custom overrides for consistent branding.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -181,11 +175,11 @@ Built with Tailwind CSS for easy customization. PrimeVue components use the Aura
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 For support and questions:
 
@@ -193,10 +187,17 @@ For support and questions:
 - Review payment instructions for specific payment method guidance
 - Contact the merchant directly for payment-related issues
 
-## 🔄 Version History
-
-- **v0.0.1** - Initial release with mobile banking and card payment support
-
 ---
+
+[nodejs-image]: https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen
+[nodejs-url]: https://nodejs.org/
+[vue-image]: https://img.shields.io/badge/vue-3.5.13-brightgreen
+[vue-url]: https://vuejs.org/
+[vite-image]: https://img.shields.io/badge/vite-6.2.4-blue
+[vite-url]: https://vitejs.dev/
+[primevue-image]: https://img.shields.io/badge/primevue-4.3.3-purple
+[primevue-url]: https://primevue.org/
+[tailwind-image]: https://img.shields.io/badge/tailwindcss-4.1.4-blue
+[tailwind-url]: https://tailwindcss.com/
 
 Built with ❤️ for seamless payment experiences in Bangladesh
