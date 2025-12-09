@@ -199,5 +199,3 @@ For support and questions:
 [primevue-url]: https://primevue.org/
 [tailwind-image]: https://img.shields.io/badge/tailwindcss-4.1.4-blue
 [tailwind-url]: https://tailwindcss.com/
-
-Built with ❤️ for seamless payment experiences in Bangladesh
