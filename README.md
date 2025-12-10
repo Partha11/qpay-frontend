@@ -108,26 +108,6 @@ Submits payment verification data and initiates processing.
 - `FAILED`: Redirects to failure URL
 - `PENDING`: Starts polling for status updates
 
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── brand/           # Brand display components
-│   ├── payment/         # Payment-related components
-│   │   ├── instruction/ # Payment instructions
-│   ├── tabs/            # Tab components for details
-│   ├── widgets/         # Reusable UI widgets
-│   │   ├── overlay/     # Loading overlay
-│   │   └── toast/       # Toast notifications
-│   └── bottombar/       # Bottom payment bar
-├── stores/              # Pinia stores
-├── utils/               # Utility functions
-├── views/               # Page components
-├── router/              # Vue Router configuration
-└── assets/              # Static assets
-```
-
 ## Development
 
 ### Available Scripts
