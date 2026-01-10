@@ -39,7 +39,6 @@ const fetchPaymentData = async () => {
                 }
             }
         );
-        console.log(response.data)
         processApiData(response.data);
     } catch (error) {
         const errorMessage = error.response?.data?.message || error.message;
@@ -77,7 +76,8 @@ onMounted(() => {
 
 <template>
     <BrandInfo :brand="paymentData.brand" @tabChange="activeTab = $event" />
-    <PaymentMethod v-if="activeTab === 'payment'" @paymentOptionSelected="handlePaymentSelection" />
+    <PaymentMethod :paymentData="paymentData" v-if="activeTab === 'payment'"
+        @paymentOptionSelected="handlePaymentSelection" />
     <TransactionDetail v-if="activeTab === 'details'" :metadata="paymentData.metadata" :amount="paymentData.amount" />
     <SupportDetail v-if="activeTab === 'support'" :brand="paymentData.brand" />
     <PaymentBar :totalAmount="formatCurrency(paymentData?.amount ?? 0, paymentData.currency ?? 'BDT')"
