@@ -1,51 +1,77 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Button } from 'primevue'
 import PaymentOption from './PaymentOption.vue'
 
-const activeTab = ref('mobile_banking')
-const tabs = ref([
-    { value: 'mobile_banking', label: 'Mobile Banking' },
-    { value: 'card_payment', label: 'Card Payment' },
-])
+const props = defineProps({
+    paymentData: {
+        type: Object,
+        default: () => ({}),
+    },
+})
 
-const mobileBankingOptions = ref([
-    {
-        name: 'bKash',
-        image: 'https://freelogopng.com/images/all_img/1656227518bkash-logo-png.png',
-    },
-    {
-        name: 'Nagad',
-        image: 'https://freelogopng.com/images/all_img/1683082228nagad-transparent-logo.png',
-    },
-    {
-        name: 'Rocket',
-        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Rocket_mobile_banking_logo.svg/250px-Rocket_mobile_banking_logo.svg.png',
-    },
-    {
-        name: 'Upay',
-        image: 'https://today.thefinancialexpress.com.bd/public/uploads/p9-Upay-Logo.jpg',
-    },
-])
+const activeTab = ref('')
 
-const cardPaymentOptions = ref([
-    {
-        name: 'Visa',
-        image: '/api/placeholder/120/80',
+// Group methods by category and generate tabs dynamically
+const tabs = computed(() => {
+    if (!props.paymentData?.brand?.methods) return []
+
+    const categoryMap = new Map()
+
+    props.paymentData.brand.methods.forEach((method) => {
+        const categorySlug = method.category.slug
+        const categoryName = method.category.name
+
+        if (!categoryMap.has(categorySlug)) {
+            categoryMap.set(categorySlug, {
+                value: categorySlug,
+                label: categoryName,
+            })
+        }
+    })
+
+    return Array.from(categoryMap.values())
+})
+
+// Group payment options by category
+const paymentOptionsByCategory = computed(() => {
+    if (!props.paymentData?.brand?.methods) return {}
+
+    const grouped = {}
+
+    props.paymentData.brand.methods.forEach((method) => {
+        const categorySlug = method.category.slug
+
+        if (!grouped[categorySlug]) {
+            grouped[categorySlug] = []
+        }
+
+        grouped[categorySlug].push({
+            name: method.name,
+            image: method.icon_url,
+            ussd_code: method.ussd_code,
+            type: method.type,
+        })
+    })
+
+    return grouped
+})
+
+// Get options for the active tab
+const activeOptions = computed(() => {
+    return paymentOptionsByCategory.value[activeTab.value] || []
+})
+
+// Set the first tab as active when tabs change
+watch(
+    tabs,
+    (newTabs) => {
+        if (newTabs.length > 0 && !activeTab.value) {
+            activeTab.value = newTabs[0].value
+        }
     },
-    {
-        name: 'Mastercard',
-        image: '/api/placeholder/120/80',
-    },
-    {
-        name: 'American Express',
-        image: '/api/placeholder/120/80',
-    },
-    {
-        name: 'UnionPay',
-        image: '/api/placeholder/120/80',
-    },
-])
+    { immediate: true }
+)
 
 const emit = defineEmits(['paymentOptionSelected'])
 
@@ -57,35 +83,17 @@ const handlePaymentSelection = (paymentMethod) => {
 <template>
     <div class="mb-6">
         <!-- Payment Method Toggle using PrimeVue Buttons -->
-        <div class="flex gap-1 p-1 rounded-lg">
-            <Button
-                v-for="tab in tabs"
-                :key="tab.value"
-                @click="activeTab = tab.value"
-                :label="tab.label"
-                class="flex-1 border-none!"
-                :class="
-                    activeTab === tab.value
-                        ? 'bg-teal-700! text-white'
-                        : 'bg-gray-200! text-gray-700!'
-                "
-                :text="activeTab !== tab.value"
-                :severity="activeTab === tab.value ? undefined : 'secondary'"
-            />
+        <div v-if="tabs.length > 0" class="flex gap-1 p-1 rounded-lg">
+            <Button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value" :label="tab.label"
+                class="flex-1 border-none!" :class="activeTab === tab.value
+                    ? 'bg-teal-700! text-white'
+                    : 'bg-gray-200! text-gray-700!'
+                    " :text="activeTab !== tab.value" :severity="activeTab === tab.value ? undefined : 'secondary'" />
         </div>
 
         <!-- Tab Content -->
-        <div class="mt-4">
-            <PaymentOption
-                v-if="activeTab === 'mobile_banking'"
-                :options="mobileBankingOptions"
-                @selected="handlePaymentSelection"
-            />
-            <PaymentOption
-                v-else-if="activeTab === 'card_payment'"
-                :options="cardPaymentOptions"
-                @selected="handlePaymentSelection"
-            />
+        <div v-if="activeOptions.length > 0" class="mt-4">
+            <PaymentOption :options="activeOptions" @selected="handlePaymentSelection" />
         </div>
     </div>
 </template>
