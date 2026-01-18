@@ -37,7 +37,7 @@ const fetchPaymentData = async () => {
         isFetching.value = true;
         loadingStore.show();
         const response = await axios.get(
-            `/api/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
+            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
             {
                 headers: {
                     'Accept': 'application/json',

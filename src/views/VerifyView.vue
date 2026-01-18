@@ -29,7 +29,7 @@ const startPollingPaymentStatus = () => {
     pollingInterval = setInterval(async () => {
         try {
             const response = await axios.get(
-                `/api/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
+                `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
                 {
                     headers: {
                         'Accept': 'application/json',
@@ -90,7 +90,7 @@ const processApiData = (data) => {
 
 const fetchPaymentData = async () => {
     try {
-        const url = `/api/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`
+        const url = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`
         const response = await axios.get(
             url, {
             headers: {
@@ -113,7 +113,7 @@ const fetchPaymentData = async () => {
 const verifyPayment = async (body) => {
     if (!body) return
     try {
-        const url = `/api/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}/execute`
+        const url = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}/execute`
         isSubmitting.value = true
         loadingStore.show()
         const response = await axios.post(url, body, {
