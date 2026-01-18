@@ -96,9 +96,9 @@ const fetchPaymentData = async () => {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            }
+            },
+            withCredentials: true
         })
-        console.log(response.data)
         processApiData(response.data)
     } catch (error) {
         toast.add({
