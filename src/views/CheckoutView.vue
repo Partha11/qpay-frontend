@@ -16,6 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const activeTab = ref('payment')
 const paymentData = ref({})
+const isFetching = ref(false)
 
 const loadingStore = useLoadingStore()
 
@@ -28,15 +29,20 @@ const processApiData = (data) => {
 }
 
 const fetchPaymentData = async () => {
+    if (isFetching.value) {
+        console.log('Skipping duplicate request');
+        return;
+    }
     try {
+        isFetching.value = true;
         loadingStore.show();
         const response = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
+            `/api/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
             {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
+                },
+                withCredentials: true,
             }
         );
         processApiData(response.data);
