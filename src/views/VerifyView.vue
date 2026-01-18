@@ -130,6 +130,9 @@ const verifyPayment = async (body) => {
             case "COMPLETED":
                 window.location = data.success_url
                 break;
+            case "PROCESSING":
+                window.location = data.success_url
+                break;
             case "FAILED":
                 window.location = data.failure_url
                 break;
