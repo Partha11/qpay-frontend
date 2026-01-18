@@ -121,6 +121,7 @@ const verifyPayment = async (body) => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
+            withCredentials: true
         })
 
         const data = response.data
