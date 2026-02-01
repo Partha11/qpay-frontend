@@ -16,6 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const activeTab = ref('payment')
 const paymentData = ref({})
+const isFetching = ref(false)
 
 const loadingStore = useLoadingStore()
 
@@ -28,7 +29,12 @@ const processApiData = (data) => {
 }
 
 const fetchPaymentData = async () => {
+    if (isFetching.value) {
+        console.log('Skipping duplicate request');
+        return;
+    }
     try {
+        isFetching.value = true;
         loadingStore.show();
         const response = await api.get(`/payments/${route.params.id}`);
         processApiData(response.data);
