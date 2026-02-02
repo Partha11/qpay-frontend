@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
 
 const props = defineProps({
@@ -16,26 +16,35 @@ const props = defineProps({
         default: 'BDT',
     },
     method: {
-        type: String,
-        default: null,
+        type: Object,
+        default: () => ({
+            name: '',
+            type: '',
+            phone_number: '',
+        }),
     },
 })
 const defaultLogoUrl = ref(
     'https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small_2x/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg',
 )
+
+const formattedType = computed(() => {
+    if (!props.method?.type) return 'Send Money'
+    return props.method.type
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/^\w/, (c) => c.toUpperCase())
+})
 </script>
 
 <template>
     <div class="bg-white rounded-xl shadow-md p-6 mb-6">
         <div class="flex items-center mb-4">
-            <img
-                :src="brand?.images?.find(() => true)?.thumbnail_url || defaultLogoUrl"
-                alt="Brand Logo"
-                class="w-12 h-12 rounded-full object-cover ring-2 ring-teal-50 mr-4"
-            />
+            <img :src="brand?.images?.find(() => true)?.thumbnail_url || defaultLogoUrl" alt="Brand Logo"
+                class="w-12 h-12 rounded-full object-cover ring-2 ring-teal-50 mr-4" />
             <div>
                 <h2 class="font-bold text-gray-800">{{ brand?.name ?? 'N/A' }}</h2>
-                <p class="text-sm text-gray-500">Payment to: {{ brand?.phone_number ?? 'N/A' }}</p>
+                <p class="text-sm text-gray-500">{{ formattedType }} to: {{ method?.phone_number ?? 'N/A' }}</p>
             </div>
         </div>
 
@@ -48,7 +57,7 @@ const defaultLogoUrl = ref(
             </div>
             <div class="flex justify-between items-center mt-1">
                 <span class="text-md text-gray-600">Payment method:</span>
-                <span class="text-md font-medium text-gray-700">{{ props.method ?? 'N/A' }}</span>
+                <span class="text-md font-medium text-gray-700">{{ props.method?.name ?? 'N/A' }}</span>
             </div>
         </div>
     </div>

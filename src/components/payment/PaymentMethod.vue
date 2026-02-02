@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Button } from 'primevue'
 import PaymentOption from './PaymentOption.vue'
 
@@ -48,6 +48,7 @@ const paymentOptionsByCategory = computed(() => {
 
         grouped[categorySlug].push({
             name: method.name,
+            slug: method.slug,
             image: method.icon_url,
             ussd_code: method.ussd_code,
             type: method.type,

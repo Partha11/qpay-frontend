@@ -1,5 +1,4 @@
 <script setup>
-import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -10,6 +9,7 @@ import PaymentMethod from '@/components/payment/PaymentMethod.vue'
 import TransactionDetail from '@/components/tabs/TransactionDetail.vue'
 import SupportDetail from '@/components/tabs/SupportDetail.vue'
 import PaymentBar from '@/components/bottombar/PaymentBar.vue'
+import api from '@/services/axios'
 
 const toast = useToast()
 const route = useRoute()
@@ -36,15 +36,7 @@ const fetchPaymentData = async () => {
     try {
         isFetching.value = true;
         loadingStore.show();
-        const response = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}/payments/${route.params.id}`,
-            {
-                headers: {
-                    'Accept': 'application/json',
-                },
-                withCredentials: true,
-            }
-        );
+        const response = await api.get(`/payments/${route.params.id}`);
         processApiData(response.data);
     } catch (error) {
         const errorMessage = error.response?.data?.message || error.message;
@@ -62,7 +54,9 @@ const fetchPaymentData = async () => {
 
 const handlePaymentSelection = (paymentMethod) => {
     // Redirect to payment details page with parameters
-    const verifyUrl = `/verify/${encodeURIComponent(route.params.id)}?method=${encodeURIComponent(paymentMethod)}`
+    const methodSlug = paymentMethod.slug
+    const methodType = paymentMethod.type?.toLowerCase() || ''
+    const verifyUrl = `/verify/${encodeURIComponent(route.params.id)}?method=${encodeURIComponent(methodSlug)}&type=${encodeURIComponent(methodType)}`
     router.push(verifyUrl)
 }
 
