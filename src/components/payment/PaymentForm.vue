@@ -24,6 +24,7 @@ function handleSubmit() {
     emit('submit', {
         phone_number: phoneNumber.value,
         trx_id: transactionId.value,
+        webhook_method: 'POST'
     })
 }
 </script>
