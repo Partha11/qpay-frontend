@@ -32,7 +32,7 @@ const selectTab = (tabKey) => {
     <div class="bg-white rounded-xl shadow-md p-4 mb-6">
         <div class="flex flex-col sm:flex-row items-center">
             <div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
-                <Avatar :image="brand?.images?.find(() => true)?.thumbnail_url || defaultLogoUrl" size="xlarge"
+                <Avatar :image="brand?.image?.thumbnail_url || defaultLogoUrl" size="xlarge"
                     shape="circle" class="w-24 h-24 ring-2 ring-teal-50 shadow-md" />
             </div>
             <div class="text-center sm:text-left">

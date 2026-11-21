@@ -40,7 +40,7 @@ const formattedType = computed(() => {
 <template>
     <div class="bg-white rounded-xl shadow-md p-6 mb-6">
         <div class="flex items-center mb-4">
-            <img :src="brand?.images?.find(() => true)?.thumbnail_url || defaultLogoUrl" alt="Brand Logo"
+            <img :src="brand?.image?.thumbnail_url || defaultLogoUrl" alt="Brand Logo"
                 class="w-12 h-12 rounded-full object-cover ring-2 ring-teal-50 mr-4" />
             <div>
                 <h2 class="font-bold text-gray-800">{{ brand?.name ?? 'N/A' }}</h2>

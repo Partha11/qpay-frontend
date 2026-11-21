@@ -44,7 +44,7 @@ function handleSubmit() {
                         <InputGroupAddon>
                             <Phone size="16"/>
                         </InputGroupAddon>
-                        <InputText id="phoneNumber" v-model="phoneNumber" type="tel" placeholder="01xxxxxxxx"
+                        <InputText id="phoneNumber" v-model="phoneNumber" type="tel" minlength="11" maxlength="12" placeholder="01xxxxxxxx"
                             class="w-full text-md!" required />
                     </InputGroup>
                 </div>
@@ -57,7 +57,7 @@ function handleSubmit() {
                             </span> -->
                             <Phone size="18"/>
                         </InputGroupAddon>
-                        <InputText id="transactionId" v-model="transactionId" placeholder="Ex: 8A4D2E..."
+                        <InputText id="transactionId" v-model="transactionId" minlength="8" maxlength="12" placeholder="Ex: 8A4D2E..."
                             class="w-full text-md!" required />
                     </InputGroup>
                 </div>

@@ -1,195 +1,136 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useLoadingStore } from '@/stores/loading'
 import BrandInfoWithoutTab from '@/components/brand/BrandInfoWithoutTab.vue'
 import PaymentForm from '@/components/payment/PaymentForm.vue'
 import PaymentInstruction from '@/components/payment/instruction/PaymentInstruction.vue'
-import api from '@/services/axios' // Assuming you created the centralized axios instance
-
-const MAX_ATTEMPTS = 3
-const POLLING_INTERVAL_MS = 3000
-const POLLING_TIMEOUT_MS = 120000 // Stop polling after 2 minutes
+import api from '@/services/axios'
+import { watchPayment } from '@/services/payment-events'
 
 const toast = useToast()
 const route = useRoute()
 const loadingStore = useLoadingStore()
-
-const method = ref('')
-const methodType = ref('')
-const selectedMethod = ref({})
 const paymentData = ref({})
-const isSubmitting = ref(false)
-const paymentAttempts = ref(0)
+const selectedMethod = ref({})
+const method = ref('')
+const submitting = ref(false)
+const loaded = ref(false)
+const expired = ref(false)
+const reconnecting = ref(false)
+const errorMessage = ref('')
+const isSubmitting = computed(() => submitting.value || !loaded.value || expired.value ||
+    !['PENDING', 'PARTIALLY_PAID'].includes(paymentData.value.status))
+const remaining = computed(() => Number(paymentData.value.remaining_amount ?? paymentData.value.amount ?? 0).toFixed(2))
+let stopEvents = () => {}
+let mounted = true
+let redirected = false
 
-// Polling state
-let pollingInterval = null
-let pollingTimeout = null
-
-const stopPolling = () => {
-    if (pollingInterval) {
-        clearInterval(pollingInterval)
-        pollingInterval = null
-    }
-    if (pollingTimeout) {
-        clearTimeout(pollingTimeout)
-        pollingTimeout = null
-    }
-}
-
-const startPollingPaymentStatus = () => {
-    // 1. Prevent multiple polling loops
-    if (pollingInterval) return
-
-    // 2. Ensure UI stays in "Loading" state during polling
-    isSubmitting.value = true
-    loadingStore.show()
-
-    // 3. Set a safety timeout to stop polling eventually (e.g. 2 mins)
-    pollingTimeout = setTimeout(() => {
-        stopPolling()
-        loadingStore.hide()
-        isSubmitting.value = false
-        toast.add({
-            severity: 'warn',
-            summary: 'Timeout',
-            detail: 'Payment verification timed out. Please check your status manually.',
-            life: 5000
-        })
-    }, POLLING_TIMEOUT_MS)
-
-    // 4. Start the interval
-    pollingInterval = setInterval(async () => {
-        try {
-            const response = await api.get(`/payments/${route.params.id}`)
-            const payment = response.data
-
-            if (payment.amount) paymentData.value.status = payment.status
-
-            switch (payment.status) {
-                case 'PROCESSING':
-                    stopPolling()
-                    window.location = payment.success_url
-                    break
-                case 'FAILED':
-                    stopPolling()
-                    window.location = payment.failure_url
-                    break
-            }
-        } catch (err) {
-            console.error('Polling check failed:', err)
-        }
-    }, POLLING_INTERVAL_MS)
-}
-
-const getUrlParams = () => {
-    const params = new URLSearchParams(window.location.search)
-    return {
-        urlMethod: params.get('method') || '',
-        urlType: params.get('type') || '',
+const finish = () => {
+    const payment = paymentData.value
+    if (redirected) return
+    // PROCESSING means receipt funds matched, NOT merchant-confirmed success.
+    if (payment.status === 'COMPLETED' && payment.success_url) {
+        redirected = true
+        stopEvents()
+        window.location.assign(payment.success_url)
+    } else if (payment.status === 'FAILED' && payment.failure_url) {
+        redirected = true
+        stopEvents()
+        window.location.assign(payment.failure_url)
+    } else if (['FAILED', 'REFUNDED', 'COMPLETED'].includes(payment.status)) {
+        stopEvents()
     }
 }
 
-const findSelectedMethod = () => {
-    if (!paymentData.value?.brand?.methods) return null
-
-    return paymentData.value.brand.methods.find(
-        (m) => m.slug === method.value && m.type?.toLowerCase() === methodType.value
-    )
-}
-
-const processApiData = (data) => {
-    paymentData.value = data
-    paymentData.value.amount = paymentData.value?.amount?.toFixed(2) ?? '0.00'
-    paymentData.value.currency = paymentData.value?.currency ?? 'BDT'
-    paymentData.value.status = paymentData.value?.status ?? 'PENDING'
-    paymentData.value.metadata = paymentData.value?.metadata ?? {}
-    paymentData.value.brand = paymentData.value?.brand ?? {}
-}
-
-const fetchPaymentData = async () => {
-    try {
-        loadingStore.show()
-        const url = `/payments/${route.params.id}`
-        const response = await api.get(url)
-        processApiData(response.data)
-    } catch (error) {
-        toast.add({
-            severity: 'danger',
-            summary: 'Error',
-            detail: error.message || 'Failed to fetch payment info',
-            life: 3000,
-        })
-    } finally {
-        loadingStore.hide()
+const applyPayment = (data) => {
+    if (!mounted || Number(data.version ?? 0) < Number(paymentData.value.version ?? -1)) return
+    if (data.id && paymentData.value.id && data.id !== paymentData.value.id) return
+    const previous = paymentData.value.status
+    // Execute and SSE have no brand payload: retain the initial checkout DTO.
+    paymentData.value = { ...paymentData.value, ...data, brand: data.brand || paymentData.value.brand || {} }
+    if (data.status === 'PARTIALLY_PAID' && previous !== 'PARTIALLY_PAID') {
+        toast.add({ severity: 'info', summary: 'Partial payment received',
+            detail: `Submit another receipt for the remaining ${remaining.value} ${paymentData.value.currency}.`, life: 5000 })
     }
+    finish()
 }
 
 const verifyPayment = async (body) => {
-    if (!body) return
-
-    stopPolling()
-
+    if (!body || isSubmitting.value) return
+    submitting.value = true
+    errorMessage.value = ''
     try {
-        const url = `/payments/${route.params.id}/execute`
-        isSubmitting.value = true
-        loadingStore.show()
-
-        const response = await api.post(url, body)
-        const data = response.data
-
-        switch (data.status) {
-            case "PROCESSING":
-                window.location = data.success_url
-                break
-            case "FAILED":
-                window.location = data.failure_url
-                break
-            default:
-                startPollingPaymentStatus()
-                break
-        }
+        const response = await api.post(`/payments/${route.params.id}/execute`, body)
+        applyPayment(response.data)
     } catch (error) {
-        paymentAttempts.value++
-
-        loadingStore.hide()
-        isSubmitting.value = false
-
-        if (paymentAttempts.value >= MAX_ATTEMPTS && paymentData.value.failure_url) {
-            window.location = paymentData.value.failure_url
-        } else {
-            const msg = error.response?.data?.message || error.message || 'Unknown error'
-            toast.add({
-                severity: 'danger',
-                summary: 'Error',
-                detail: msg,
-                life: 3000,
-            })
+        if (!mounted) return
+        errorMessage.value = error.response?.data?.message || error.message || 'Unable to submit receipt. Please retry.'
+        if ([401, 409].includes(error.response?.status) && errorMessage.value.includes('session')) {
+            expired.value = true
+            stopEvents()
         }
+        toast.add({ severity: 'error', summary: 'Receipt submission failed', detail: errorMessage.value, life: 5000 })
+    } finally {
+        submitting.value = false
     }
 }
 
 onMounted(async () => {
-    const { urlMethod, urlType } = getUrlParams()
-    method.value = urlMethod
-    methodType.value = urlType
-    await fetchPaymentData()
-    selectedMethod.value = findSelectedMethod()
+    const params = new URLSearchParams(window.location.search)
+    method.value = params.get('method') || ''
+    loadingStore.show()
+    try {
+        const response = await api.get(`/payments/${route.params.id}`)
+        if (!mounted) return
+        loaded.value = true
+        applyPayment(response.data)
+        selectedMethod.value = paymentData.value.brand?.methods?.find((m) =>
+            m.slug === method.value && m.type?.toLowerCase() === (params.get('type') || '')) || {}
+        if (redirected || ['COMPLETED', 'FAILED', 'REFUNDED'].includes(paymentData.value.status)) return
+        // Start after GET establishes the HttpOnly session-lock cookie.
+        stopEvents = watchPayment(route.params.id, {
+            onPayment: applyPayment,
+            onOpen: () => { reconnecting.value = false },
+            onError: () => { reconnecting.value = true },
+            onExpired: () => {
+                expired.value = true
+                errorMessage.value = 'Invalid or expired payment session. Request a new payment link from the merchant.'
+            },
+        })
+    } catch (error) {
+        if (!mounted) return
+        errorMessage.value = error.response?.data?.message || error.message || 'Failed to fetch payment info'
+        toast.add({ severity: 'error', summary: 'Payment unavailable', detail: errorMessage.value, life: 5000 })
+    } finally {
+        loadingStore.hide()
+    }
 })
 
 onUnmounted(() => {
-    stopPolling()
+    mounted = false
+    stopEvents()
+    loadingStore.hide()
 })
 </script>
 
 <template>
     <div class="about">
-        <BrandInfoWithoutTab :brand="paymentData.brand" :amount="paymentData.amount" :currency="paymentData.currency"
+        <BrandInfoWithoutTab :brand="paymentData.brand" :amount="remaining" :currency="paymentData.currency"
             :method="selectedMethod" />
-        <PaymentForm :method="method" :isSubmitting="isSubmitting" @submit="verifyPayment" />
-        <PaymentInstruction
-            :method="selectedMethod"
-            :amount="paymentData?.amount" />
+        <div class="mb-4 p-4 rounded bg-teal-50" role="status" aria-live="polite" data-payment-status>
+            <p v-if="expired">{{ errorMessage }}</p>
+            <p v-else-if="paymentData.status === 'PROCESSING'">Payment received. Waiting for merchant verification…</p>
+            <p v-else-if="paymentData.status === 'PARTIALLY_PAID'">Partial payment received. Remaining: {{ remaining }} {{ paymentData.currency }}. Submit another receipt below.</p>
+            <p v-else-if="paymentData.status === 'COMPLETED'">Payment completed.</p>
+            <p v-else-if="paymentData.status === 'FAILED'">Payment failed. Contact the merchant.</p>
+            <p v-else-if="paymentData.status === 'REFUNDED'">Payment refunded. Contact the merchant.</p>
+            <p v-else>Enter the transaction ID and sender phone number from your payment.</p>
+            <p v-if="reconnecting && !expired">Live connection interrupted. Reconnecting automatically… If your link has expired, request a new one from the merchant.</p>
+            <p v-if="errorMessage && !expired" role="alert">{{ errorMessage }}</p>
+        </div>
+        <PaymentForm :key="`${paymentData.id}-${paymentData.version}`" :method="method" :isSubmitting="isSubmitting" @submit="verifyPayment" />
+        <PaymentInstruction :method="selectedMethod" :amount="remaining" />
     </div>
 </template>
